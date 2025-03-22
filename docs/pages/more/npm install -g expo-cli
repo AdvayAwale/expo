@@ -1,0 +1,121 @@
+// React Native code for Marathi Bible Audio App
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import { Audio } from "expo-av";
+
+export default function App() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sound, setSound] = useState(null);
+  const [currentTrack, setCurrentTrack] = useState(null);
+
+  const audioTracks = {
+    OV: require("./assets/ov_bible.mp3"),
+    PanditaRamabai: require("./assets/pandita_ramabai_bible.mp3"),
+  };
+
+  async function playSound(track) {
+    if (sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+    }
+
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(track);
+      setSound(newSound);
+      setCurrentTrack(track);
+      setIsPlaying(true);
+      await newSound.playAsync();
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  }
+
+  async function stopSound() {
+    if (sound) {
+      try {
+        await sound.stopAsync();
+        setIsPlaying(false);
+      } catch (error) {
+        console.error("Error stopping sound:", error);
+      }
+    }
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Marathi Audio Bible</Text>
+      <Image
+        source={{ uri: "https://example.com/app-logo.png" }}
+        style={styles.logo}
+      />
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => playSound(audioTracks.OV)}
+      >
+        <Text style={styles.buttonText}>Play OV Version</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => playSound(audioTracks.PanditaRamabai)}
+      >
+        <Text style={styles.buttonText}>Play Pandita Ramabai Version</Text>
+      </TouchableOpacity>
+
+      {isPlaying && (
+        <TouchableOpacity style={styles.stopButton} onPress={stopSound}>
+          <Text style={styles.buttonText}>Stop</Text>
+        </TouchableOpacity>
+      )}
+
+      <Text style={styles.footer}>Enjoy the Word of God!</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f3f4f6",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 20,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: "#4caf50",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  stopButton: {
+    backgroundColor: "#e53935",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 16,
+  },
+  footer: {
+    marginTop: 30,
+    fontSize: 16,
+    color: "#6b7280",
+  },
+});
